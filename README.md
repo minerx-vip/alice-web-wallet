@@ -61,4 +61,5 @@ This app includes a web app manifest (`public/manifest.json`) and service worker
 
 ## Notes
 
-- Keys and encrypted wallet payloads are stored in the browser (localStorage). Back up your wallet data and mnemonic safely.
+- Wallet data (keys and encrypted payloads) is stored locally in your browser (localStorage) and is not uploaded to any server by this app.
+- Back up your wallet data and mnemonic safely.
