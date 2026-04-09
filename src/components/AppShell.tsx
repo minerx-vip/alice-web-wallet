@@ -3,8 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useWalletStore } from '@/lib/store';
 import Sidebar from './Sidebar';
+import { usePathname } from 'next/navigation';
+import { getLangFromPathname } from '@/lib/i18n';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const lang = getLangFromPathname(pathname);
   const isHydrated = useWalletStore(s => s.isHydrated);
   const hydrate = useWalletStore(s => s.hydrate);
   const [mounted, setMounted] = useState(false);
@@ -12,12 +16,17 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setMounted(true);
     hydrate();
-  }, [hydrate]);
+    try {
+      document.documentElement.lang = lang;
+    } catch {
+      // ignore
+    }
+  }, [hydrate, lang]);
 
   if (!mounted || !isHydrated) {
     return (
       <div className="flex items-center justify-center w-full h-screen" suppressHydrationWarning>
-        <div className="text-muted animate-pulse text-lg">Loading...</div>
+        <div className="text-muted animate-pulse text-lg">{lang === 'zh-CN' ? '加载中…' : 'Loading...'}</div>
       </div>
     );
   }

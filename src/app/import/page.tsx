@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useWalletStore } from '@/lib/store';
 import {
   validateMnemonic, createWalletPayload, addressFromMnemonic,
@@ -9,12 +10,15 @@ import {
 } from '@/lib/crypto';
 import { generateId } from '@/lib/utils';
 import type { WalletPayloadV2 } from '@/lib/types';
+import { getLangFromPathname, withLang } from '@/lib/i18n';
 import AppShell from '@/components/AppShell';
 import { Loader2, Upload, FileText, Check, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 
 function ImportPage() {
   const router = useRouter();
+  const pathname = usePathname();
+  const lang = getLangFromPathname(pathname);
   const { addWallet, unlock } = useWalletStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -72,7 +76,7 @@ function ImportPage() {
       });
       unlock(seed, mnemonic.trim());
       toast.success('Wallet imported!');
-      router.push('/');
+      router.push(withLang('/', lang));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Import failed');
     } finally {
@@ -136,7 +140,7 @@ function ImportPage() {
       unlock(jsonDecrypted.seed, jsonDecrypted.mnemonic);
     }
     toast.success('Wallet imported!');
-    router.push('/');
+    router.push(withLang('/', lang));
   };
 
   // --- Render ---

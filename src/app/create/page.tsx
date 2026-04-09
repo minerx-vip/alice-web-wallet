@@ -2,15 +2,19 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useWalletStore } from '@/lib/store';
 import { generateMnemonic, createWalletPayload, addressFromMnemonic } from '@/lib/crypto';
 import { generateId } from '@/lib/utils';
+import { getLangFromPathname, withLang } from '@/lib/i18n';
 import AppShell from '@/components/AppShell';
 import { Loader2, Eye, EyeOff, Copy, Check, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 
 function CreatePage() {
   const router = useRouter();
+  const pathname = usePathname();
+  const lang = getLangFromPathname(pathname);
   const { addWallet, unlock } = useWalletStore();
 
   const [step, setStep] = useState<'name' | 'mnemonic' | 'confirm' | 'password' | 'done'>('name');
@@ -92,7 +96,7 @@ function CreatePage() {
       unlock(seed, mnemonic);
       setStep('done');
       toast.success('Wallet created successfully!');
-      setTimeout(() => router.push('/'), 1500);
+      setTimeout(() => router.push(withLang('/', lang)), 1500);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create wallet');
     } finally {

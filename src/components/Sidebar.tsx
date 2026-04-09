@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useWalletStore } from '@/lib/store';
 import { shortAddress } from '@/lib/utils';
+import { getLangFromPathname, setStoredLang, switchLangPath, withLang } from '@/lib/i18n';
 import { useState, useRef, useEffect } from 'react';
 
 const NAV = [
@@ -21,6 +22,7 @@ const NAV = [
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const lang = getLangFromPathname(pathname);
   const wallets = useWalletStore(s => s.wallets);
   const activeWalletId = useWalletStore(s => s.activeWalletId);
   const unlockedSeed = useWalletStore(s => s.unlockedSeed);
@@ -62,9 +64,21 @@ export default function Sidebar() {
           <Wallet className="w-6 h-6 text-primary" />
           Alice Wallet
         </h1>
-        <button onClick={() => setMobileOpen(false)} className="md:hidden text-muted hover:text-foreground">
-          <X className="w-5 h-5" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              const next = lang === 'en' ? 'zh-CN' : 'en';
+              setStoredLang(next);
+              router.push(switchLangPath(pathname, next));
+            }}
+            className="text-xs px-2 py-1 rounded border border-border text-muted hover:text-foreground hover:bg-card-hover"
+          >
+            {lang === 'en' ? '中文' : 'EN'}
+          </button>
+          <button onClick={() => setMobileOpen(false)} className="md:hidden text-muted hover:text-foreground">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
       {/* Wallets list - always visible */}
@@ -72,7 +86,7 @@ export default function Sidebar() {
         {wallets.map(w => (
           <div
             key={w.id}
-            onClick={() => { setActiveWallet(w.id); if (pathname !== '/') router.push('/'); }}
+            onClick={() => { setActiveWallet(w.id); if (pathname !== withLang('/', lang)) router.push(withLang('/', lang)); }}
             className={`w-full text-left p-2.5 rounded-lg text-sm transition-colors cursor-pointer ${
               w.id === activeWalletId
                 ? 'bg-primary/15 border border-primary/30'
@@ -109,10 +123,10 @@ export default function Sidebar() {
           </div>
         ))}
         <div className="flex gap-2 pt-1">
-          <Link href="/create" className="flex-1 flex items-center justify-center gap-1 p-2 rounded-lg text-xs text-primary hover:bg-card-hover">
+          <Link href={withLang('/create', lang)} className="flex-1 flex items-center justify-center gap-1 p-2 rounded-lg text-xs text-primary hover:bg-card-hover">
             <Plus className="w-3.5 h-3.5" /> Create
           </Link>
-          <Link href="/import" className="flex-1 flex items-center justify-center gap-1 p-2 rounded-lg text-xs text-primary hover:bg-card-hover">
+          <Link href={withLang('/import', lang)} className="flex-1 flex items-center justify-center gap-1 p-2 rounded-lg text-xs text-primary hover:bg-card-hover">
             <Download className="w-3.5 h-3.5" /> Import
           </Link>
         </div>
@@ -121,11 +135,12 @@ export default function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 p-3 space-y-1">
         {NAV.map(item => {
-          const isActive = pathname === item.href;
+          const href = withLang(item.href, lang);
+          const isActive = pathname === href;
           return (
             <Link
               key={item.href}
-              href={item.href}
+              href={href}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 isActive
                   ? 'bg-primary/15 text-primary'
@@ -161,9 +176,21 @@ export default function Sidebar() {
           <Wallet className="w-5 h-5 text-primary" />
           Alice Wallet
         </h1>
-        <button onClick={() => setMobileOpen(true)} className="text-muted hover:text-foreground">
-          <Menu className="w-6 h-6" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              const next = lang === 'en' ? 'zh-CN' : 'en';
+              setStoredLang(next);
+              router.push(switchLangPath(pathname, next));
+            }}
+            className="text-xs px-2 py-1 rounded border border-border text-muted hover:text-foreground hover:bg-card-hover"
+          >
+            {lang === 'en' ? '中文' : 'EN'}
+          </button>
+          <button onClick={() => setMobileOpen(true)} className="text-muted hover:text-foreground">
+            <Menu className="w-6 h-6" />
+          </button>
+        </div>
       </div>
 
       {/* Mobile overlay */}
