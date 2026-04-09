@@ -9,7 +9,8 @@ import {
 } from 'lucide-react';
 import { useWalletStore } from '@/lib/store';
 import { shortAddress } from '@/lib/utils';
-import { getLangFromPathname, setStoredLang, switchLangPath, withLang } from '@/lib/i18n';
+import { getActiveLang, setStoredLang, switchLangPath, withLang } from '@/lib/i18n';
+import { uiText } from '@/lib/ui-text';
 import { useState, useRef, useEffect } from 'react';
 
 const NAV = [
@@ -22,7 +23,7 @@ const NAV = [
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const lang = getLangFromPathname(pathname);
+  const lang = getActiveLang(pathname);
   const wallets = useWalletStore(s => s.wallets);
   const activeWalletId = useWalletStore(s => s.activeWalletId);
   const unlockedSeed = useWalletStore(s => s.unlockedSeed);
@@ -124,10 +125,10 @@ export default function Sidebar() {
         ))}
         <div className="flex gap-2 pt-1">
           <Link href={withLang('/create', lang)} className="flex-1 flex items-center justify-center gap-1 p-2 rounded-lg text-xs text-primary hover:bg-card-hover">
-            <Plus className="w-3.5 h-3.5" /> Create
+            <Plus className="w-3.5 h-3.5" /> {uiText(lang, 'nav.create')}
           </Link>
           <Link href={withLang('/import', lang)} className="flex-1 flex items-center justify-center gap-1 p-2 rounded-lg text-xs text-primary hover:bg-card-hover">
-            <Download className="w-3.5 h-3.5" /> Import
+            <Download className="w-3.5 h-3.5" /> {uiText(lang, 'nav.import')}
           </Link>
         </div>
       </div>
@@ -148,7 +149,14 @@ export default function Sidebar() {
               }`}
             >
               <item.icon className="w-5 h-5" />
-              {item.label}
+              {uiText(
+                lang,
+                item.label === 'Dashboard'
+                  ? 'nav.dashboard'
+                  : item.label === 'Transfer'
+                    ? 'nav.transfer'
+                    : 'nav.settings'
+              )}
             </Link>
           );
         })}
@@ -161,7 +169,7 @@ export default function Sidebar() {
             onClick={lock}
             className="w-full flex items-center justify-center gap-2 p-2.5 rounded-lg text-sm text-muted hover:text-foreground hover:bg-card-hover"
           >
-            <LogOut className="w-4 h-4" /> Lock Wallet
+            <LogOut className="w-4 h-4" /> {uiText(lang, 'nav.lock_wallet')}
           </button>
         </div>
       )}

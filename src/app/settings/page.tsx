@@ -6,6 +6,9 @@ import { decryptWalletPayload, createWalletPayload } from '@/lib/crypto';
 import { shortAddress } from '@/lib/utils';
 import AppShell from '@/components/AppShell';
 import PasswordDialog from '@/components/PasswordDialog';
+import { usePathname } from 'next/navigation';
+import { getActiveLang } from '@/lib/i18n';
+import { uiText } from '@/lib/ui-text';
 import {
   Loader2, Eye, EyeOff, Copy, Check, Trash2,
   Key, Shield, Edit3, Download, AlertTriangle,
@@ -13,6 +16,8 @@ import {
 import { toast } from 'sonner';
 
 function SettingsPage() {
+  const pathname = usePathname();
+  const lang = getActiveLang(pathname);
   const {
     wallets, activeWalletId, unlockedSeed, unlockedMnemonic,
     unlock, lock, removeWallet, renameWallet, updateWalletPayload,
@@ -48,7 +53,7 @@ function SettingsPage() {
     const result = await decryptWalletPayload(wallet.payload, password);
     unlock(result.seed, result.mnemonic);
     setShowPwDialog(false);
-    toast.success('Wallet unlocked');
+    toast.success(uiText(lang, 'toast.wallet_unlocked'));
 
     if (pwDialogAction === 'export') {
       if (result.mnemonic) {
@@ -116,7 +121,7 @@ function SettingsPage() {
     try {
       const payload = await createWalletPayload(unlockedMnemonic, newPassword);
       updateWalletPayload(wallet.id, payload);
-      toast.success('Password updated');
+      toast.success(uiText(lang, 'toast.password_updated'));
       setShowChangePw(false);
       setNewPassword('');
       setConfirmNewPw('');
@@ -141,14 +146,14 @@ function SettingsPage() {
     if (!wallet || !editName.trim()) return;
     renameWallet(wallet.id, editName.trim());
     setEditing(false);
-    toast.success('Wallet renamed');
+    toast.success(uiText(lang, 'toast.wallet_renamed'));
   };
 
   const handleDelete = () => {
     if (!wallet) return;
     removeWallet(wallet.id);
     setConfirmDelete(false);
-    toast.success('Wallet removed');
+    toast.success(uiText(lang, 'toast.wallet_removed'));
   };
 
   const handleExportJson = () => {
@@ -161,7 +166,7 @@ function SettingsPage() {
     a.download = `wallet-${wallet.name.replace(/\s+/g, '_')}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success('wallet.json exported');
+    toast.success(uiText(lang, 'toast.wallet_json_exported'));
   };
 
   const copyAddress = () => {
@@ -172,12 +177,12 @@ function SettingsPage() {
   };
 
   if (!wallet) {
-    return <p className="text-muted">Select a wallet first.</p>;
+    return <p className="text-muted">{uiText(lang, 'settings.select_wallet_first')}</p>;
   }
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      <h1 className="text-2xl font-bold">Settings</h1>
+      <h1 className="text-2xl font-bold">{uiText(lang, 'settings.title')}</h1>
 
       {/* Wallet info */}
       <div className="card space-y-3">
@@ -191,8 +196,8 @@ function SettingsPage() {
                 autoFocus
                 onKeyDown={e => e.key === 'Enter' && handleRename()}
               />
-              <button onClick={handleRename} className="btn-primary text-sm py-1.5 px-3">Save</button>
-              <button onClick={() => setEditing(false)} className="btn-outline text-sm py-1.5 px-3">Cancel</button>
+              <button onClick={handleRename} className="btn-primary text-sm py-1.5 px-3">{uiText(lang, 'common.save')}</button>
+              <button onClick={() => setEditing(false)} className="btn-outline text-sm py-1.5 px-3">{uiText(lang, 'common.cancel')}</button>
             </div>
           ) : (
             <>
@@ -219,30 +224,30 @@ function SettingsPage() {
 
       {/* Security */}
       <div className="card space-y-4">
-        <h3 className="font-semibold flex items-center gap-2"><Shield className="w-5 h-5 text-primary" /> Security</h3>
+        <h3 className="font-semibold flex items-center gap-2"><Shield className="w-5 h-5 text-primary" /> {uiText(lang, 'settings.security')}</h3>
 
         <div className="space-y-3">
           <button onClick={handleExportMnemonic} className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-card-hover text-left">
             <Key className="w-5 h-5 text-muted" />
             <div>
-              <div className="text-sm font-medium">Export Mnemonic</div>
-              <div className="text-xs text-muted">View your recovery phrase</div>
+              <div className="text-sm font-medium">{uiText(lang, 'settings.export_mnemonic')}</div>
+              <div className="text-xs text-muted">{uiText(lang, 'settings.view_recovery_phrase')}</div>
             </div>
           </button>
 
           <button onClick={handleStartChangePw} className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-card-hover text-left">
             <Shield className="w-5 h-5 text-muted" />
             <div>
-              <div className="text-sm font-medium">Change Password</div>
-              <div className="text-xs text-muted">Update wallet encryption password</div>
+              <div className="text-sm font-medium">{uiText(lang, 'settings.change_password')}</div>
+              <div className="text-xs text-muted">{uiText(lang, 'settings.update_wallet_password')}</div>
             </div>
           </button>
 
           <button onClick={handleExportJson} className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-card-hover text-left">
             <Download className="w-5 h-5 text-muted" />
             <div>
-              <div className="text-sm font-medium">Export wallet.json</div>
-              <div className="text-xs text-muted">Download encrypted wallet file</div>
+              <div className="text-sm font-medium">{uiText(lang, 'settings.export_wallet_json')}</div>
+              <div className="text-xs text-muted">{uiText(lang, 'settings.download_encrypted_wallet_file')}</div>
             </div>
           </button>
         </div>
@@ -253,9 +258,9 @@ function SettingsPage() {
         <div className="card border-danger/30 space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold text-danger flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5" /> Mnemonic Phrase
+              <AlertTriangle className="w-5 h-5" /> {uiText(lang, 'settings.mnemonic_phrase')}
             </h3>
-            <span className="text-xs text-muted">Auto-hide in {mnemonicCountdown}s</span>
+            <span className="text-xs text-muted">{uiText(lang, 'settings.auto_hide_in')} {mnemonicCountdown}s</span>
           </div>
           <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
             {mnemonicWords.map((word, i) => (
@@ -269,14 +274,14 @@ function SettingsPage() {
             <button
               onClick={() => {
                 navigator.clipboard.writeText(mnemonicWords.join(' '));
-                toast.success('Mnemonic copied to clipboard');
+                toast.success(uiText(lang, 'toast.mnemonic_copied'));
               }}
               className="btn-outline flex-1 text-sm flex items-center justify-center gap-2"
             >
-              <Copy className="w-4 h-4" /> Copy
+              <Copy className="w-4 h-4" /> {uiText(lang, 'common.copy')}
             </button>
             <button onClick={() => { setShowMnemonic(false); setMnemonicWords([]); }} className="btn-outline flex-1 text-sm">
-              Hide Now
+              {uiText(lang, 'common.hide_now')}
             </button>
           </div>
         </div>
@@ -285,32 +290,32 @@ function SettingsPage() {
       {/* Change password form */}
       {showChangePw && (
         <div className="card space-y-4">
-          <h3 className="font-semibold">Change Password</h3>
+          <h3 className="font-semibold">{uiText(lang, 'settings.change_password')}</h3>
           <div>
-            <label className="text-sm text-muted mb-1 block">New Password</label>
+            <label className="text-sm text-muted mb-1 block">{uiText(lang, 'settings.new_password')}</label>
             <input
               type="password"
               value={newPassword}
               onChange={e => setNewPassword(e.target.value)}
-              placeholder="At least 8 characters"
+              placeholder={uiText(lang, 'settings.at_least_8')}
               className="w-full"
             />
           </div>
           <div>
-            <label className="text-sm text-muted mb-1 block">Confirm New Password</label>
+            <label className="text-sm text-muted mb-1 block">{uiText(lang, 'settings.confirm_new_password')}</label>
             <input
               type="password"
               value={confirmNewPw}
               onChange={e => setConfirmNewPw(e.target.value)}
-              placeholder="Repeat new password"
+              placeholder={uiText(lang, 'settings.repeat_new_password')}
               className="w-full"
             />
           </div>
           <div className="flex gap-3">
-            <button onClick={() => setShowChangePw(false)} className="btn-outline flex-1">Cancel</button>
+            <button onClick={() => setShowChangePw(false)} className="btn-outline flex-1">{uiText(lang, 'common.cancel')}</button>
             <button onClick={handleChangePassword} className="btn-primary flex-1 flex items-center justify-center gap-2" disabled={changingPw}>
               {changingPw && <Loader2 className="w-4 h-4 animate-spin" />}
-              Update Password
+              {uiText(lang, 'settings.update_password')}
             </button>
           </div>
         </div>
@@ -319,20 +324,20 @@ function SettingsPage() {
       {/* Danger zone */}
       <div className="card border-danger/20 space-y-3">
         <h3 className="font-semibold text-danger flex items-center gap-2">
-          <Trash2 className="w-5 h-5" /> Danger Zone
+          <Trash2 className="w-5 h-5" /> {uiText(lang, 'settings.danger_zone')}
         </h3>
         {!confirmDelete ? (
           <button onClick={() => setConfirmDelete(true)} className="btn-danger text-sm">
-            Remove Wallet
+            {uiText(lang, 'settings.remove_wallet')}
           </button>
         ) : (
           <div className="space-y-3">
             <p className="text-sm text-danger">
-              This removes the wallet from this browser. Make sure you have your mnemonic backup!
+              {uiText(lang, 'settings.remove_wallet_warning')}
             </p>
             <div className="flex gap-3">
-              <button onClick={() => setConfirmDelete(false)} className="btn-outline flex-1">Cancel</button>
-              <button onClick={handleDelete} className="btn-danger flex-1">Yes, Remove</button>
+              <button onClick={() => setConfirmDelete(false)} className="btn-outline flex-1">{uiText(lang, 'common.cancel')}</button>
+              <button onClick={handleDelete} className="btn-danger flex-1">{uiText(lang, 'settings.yes_remove')}</button>
             </div>
           </div>
         )}
@@ -341,9 +346,9 @@ function SettingsPage() {
       <PasswordDialog
         open={showPwDialog}
         title={
-          pwDialogAction === 'export' ? 'Enter password to export mnemonic' :
-          pwDialogAction === 'changePassword' ? 'Enter current password' :
-          'Unlock Wallet'
+          pwDialogAction === 'export' ? uiText(lang, 'settings.enter_password_to_export_mnemonic') :
+          pwDialogAction === 'changePassword' ? uiText(lang, 'settings.enter_current_password') :
+          uiText(lang, 'pw.unlock_wallet')
         }
         onSubmit={handleUnlock}
         onCancel={() => setShowPwDialog(false)}

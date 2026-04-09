@@ -1,11 +1,13 @@
 import type { NextConfig } from "next";
 import { resolve } from "path";
 
+const isProd = process.env.NODE_ENV === "production";
+
 const nextConfig: NextConfig = {
   output: "export",
   trailingSlash: true,
-  basePath: "/alice-web-wallet",
-  assetPrefix: "/alice-web-wallet/",
+  basePath: isProd ? "/alice-web-wallet" : undefined,
+  assetPrefix: isProd ? "/alice-web-wallet/" : undefined,
   images: {
     unoptimized: true,
   },

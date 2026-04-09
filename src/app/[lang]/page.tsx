@@ -10,6 +10,7 @@ import AppShell from '@/components/AppShell';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { getLangFromPathname, withLang } from '@/lib/i18n';
+import { uiText } from '@/lib/ui-text';
 import {
   Wallet, ArrowUpRight, ArrowDownLeft, Copy, Check,
   RefreshCw, Plus, Download, Send, Loader2,
@@ -104,17 +105,15 @@ function Dashboard() {
           <Wallet className="w-10 h-10 text-primary" />
         </div>
         <div className="text-center">
-          <h2 className="text-2xl font-bold mb-2">Welcome to Alice Wallet</h2>
-          <p className="text-muted max-w-md">
-            Create a new wallet or import an existing one to get started with Alice Protocol.
-          </p>
+          <h2 className="text-2xl font-bold mb-2">{uiText(lang, 'dashboard.welcome_title')}</h2>
+          <p className="text-muted max-w-md">{uiText(lang, 'dashboard.welcome_desc')}</p>
         </div>
         <div className="flex gap-4">
           <Link href={withLang('/create', lang)} className="btn-primary flex items-center gap-2">
-            <Plus className="w-4 h-4" /> Create Wallet
+            <Plus className="w-4 h-4" /> {uiText(lang, 'dashboard.create_wallet')}
           </Link>
           <Link href={withLang('/import', lang)} className="btn-outline flex items-center gap-2">
-            <Download className="w-4 h-4" /> Import
+            <Download className="w-4 h-4" /> {uiText(lang, 'dashboard.import')}
           </Link>
         </div>
       </div>
@@ -122,7 +121,7 @@ function Dashboard() {
   }
 
   if (!wallet) {
-    return <p className="text-muted">Select a wallet from the sidebar.</p>;
+    return <p className="text-muted">{uiText(lang, 'dashboard.select_wallet')}</p>;
   }
 
   const totalPages = Math.ceil(txns.length / PAGE_SIZE);
@@ -133,7 +132,7 @@ function Dashboard() {
       {/* Balance card */}
       <div className="card bg-gradient-to-br from-primary/10 to-card">
         <div className="flex items-center justify-between mb-1">
-          <span className="text-sm text-muted">Balance</span>
+          <span className="text-sm text-muted">{uiText(lang, 'dashboard.balance')}</span>
           <button onClick={fetchData} className="text-muted hover:text-foreground" disabled={loadingBalance}>
             <RefreshCw className={`w-4 h-4 ${loadingBalance ? 'animate-spin' : ''}`} />
           </button>
@@ -142,7 +141,7 @@ function Dashboard() {
           {loadingBalance ? (
             <Loader2 className="w-8 h-8 animate-spin text-muted" />
           ) : balanceError ? (
-            <span className="text-danger text-base">Failed to load balance</span>
+            <span className="text-danger text-base">{uiText(lang, 'dashboard.failed_load_balance')}</span>
           ) : balance !== null ? (
             <>{formatBalance(balance)} <span className="text-lg text-muted font-normal">ALICE</span></>
           ) : (
@@ -163,26 +162,26 @@ function Dashboard() {
           <Send className="w-5 h-5 text-primary" />
         </div>
         <div>
-          <div className="font-medium">Send</div>
-          <div className="text-xs text-muted">Transfer ALICE</div>
+          <div className="font-medium">{uiText(lang, 'dashboard.send')}</div>
+          <div className="text-xs text-muted">{uiText(lang, 'dashboard.transfer_alice')}</div>
         </div>
       </Link>
 
       {/* Transaction history */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="font-semibold">Transactions</h3>
+          <h3 className="font-semibold">{uiText(lang, 'dashboard.transactions')}</h3>
           {loadingTxns && <Loader2 className="w-4 h-4 animate-spin text-muted" />}
         </div>
         <div className="card p-0 divide-y divide-border overflow-hidden">
           {loadingTxns ? (
             <div className="p-6 flex items-center justify-center gap-2 text-muted text-sm">
-              <Loader2 className="w-4 h-4 animate-spin" /> Loading transactions...
+              <Loader2 className="w-4 h-4 animate-spin" /> {uiText(lang, 'dashboard.loading_transactions')}
             </div>
           ) : txnsError ? (
-            <div className="p-6 text-center text-danger text-sm">Failed to load transactions</div>
+            <div className="p-6 text-center text-danger text-sm">{uiText(lang, 'dashboard.failed_load_transactions')}</div>
           ) : txns.length === 0 ? (
-            <div className="p-6 text-center text-muted text-sm">No transactions found</div>
+            <div className="p-6 text-center text-muted text-sm">{uiText(lang, 'history.no_transactions')}</div>
           ) : (
             pagedTxns.map((tx, i) => {
               const isSend = tx.from_address === wallet.address;

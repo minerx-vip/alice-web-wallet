@@ -11,6 +11,7 @@ import {
 import { generateId } from '@/lib/utils';
 import type { WalletPayloadV2 } from '@/lib/types';
 import { getLangFromPathname, withLang } from '@/lib/i18n';
+import { uiText } from '@/lib/ui-text';
 import AppShell from '@/components/AppShell';
 import { Loader2, Upload, FileText, Check, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
@@ -44,21 +45,21 @@ function ImportPage() {
     setError('');
     const valid = await validateMnemonic(mnemonic.trim());
     if (!valid) {
-      setError('Invalid mnemonic. Enter valid BIP39 words (12/15/18/21/24).');
+      setError(uiText(lang, 'import.invalid_mnemonic'));
       return;
     }
     try {
       const info = await addressFromMnemonic(mnemonic.trim());
       setAddress(info.address);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to derive address');
+      setError(err instanceof Error ? err.message : uiText(lang, 'import.failed_derive_address'));
     }
   };
 
   const handleImportMnemonic = async () => {
-    if (!walletName.trim()) { setError('Enter a wallet name'); return; }
-    if (password.length < 8) { setError('Password must be at least 8 characters'); return; }
-    if (password !== confirmPw) { setError('Passwords do not match'); return; }
+    if (!walletName.trim()) { setError(uiText(lang, 'import.enter_wallet_name')); return; }
+    if (password.length < 8) { setError(uiText(lang, 'create.password_min_8')); return; }
+    if (password !== confirmPw) { setError(uiText(lang, 'create.passwords_no_match')); return; }
 
     setLoading(true);
     setError('');
@@ -75,7 +76,7 @@ function ImportPage() {
         createdAt: Date.now(),
       });
       unlock(seed, mnemonic.trim());
-      toast.success('Wallet imported!');
+      toast.success(uiText(lang, 'toast.wallet_imported'));
       router.push(withLang('/', lang));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Import failed');
@@ -96,14 +97,14 @@ function ImportPage() {
       const text = await file.text();
       const data = JSON.parse(text);
       if (!isValidWalletPayload(data)) {
-        setError('Invalid wallet.json format. Only version 2 wallets are supported.');
+        setError(uiText(lang, 'import.invalid_wallet_json_format'));
         return;
       }
       setJsonPayload(data);
       setAddress(data.address);
       if (!walletName) setWalletName(file.name.replace(/\.json$/, ''));
     } catch {
-      setError('Failed to parse JSON file');
+      setError(uiText(lang, 'import.failed_parse_json'));
     }
   };
 
@@ -115,9 +116,9 @@ function ImportPage() {
       const result = await decryptWalletPayload(jsonPayload, jsonPassword);
       setJsonDecrypted(result);
       setJsonVerified(true);
-      toast.success('Password verified! Wallet can be imported.');
+      toast.success(uiText(lang, 'import.password_verified_ready'));
     } catch {
-      setError('Invalid password or corrupted wallet file');
+      setError(uiText(lang, 'import.invalid_password_or_corrupt'));
     } finally {
       setLoading(false);
     }
@@ -125,7 +126,7 @@ function ImportPage() {
 
   const handleImportJson = () => {
     if (!jsonPayload || !walletName.trim()) {
-      setError('Enter a wallet name');
+      setError(uiText(lang, 'import.enter_wallet_name'));
       return;
     }
     addWallet({
@@ -139,7 +140,7 @@ function ImportPage() {
     if (jsonDecrypted) {
       unlock(jsonDecrypted.seed, jsonDecrypted.mnemonic);
     }
-    toast.success('Wallet imported!');
+    toast.success(uiText(lang, 'toast.wallet_imported'));
     router.push(withLang('/', lang));
   };
 
@@ -147,7 +148,7 @@ function ImportPage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Import Wallet</h1>
+      <h1 className="text-2xl font-bold mb-6">{uiText(lang, 'import.title')}</h1>
 
       {mode === 'select' && (
         <div className="grid sm:grid-cols-2 gap-4">
@@ -156,54 +157,54 @@ function ImportPage() {
             className="card card-hover text-left space-y-3"
           >
             <FileText className="w-8 h-8 text-primary" />
-            <div className="font-semibold">Mnemonic Phrase</div>
-            <p className="text-sm text-muted">Import using 12/24 word recovery phrase</p>
+            <div className="font-semibold">{uiText(lang, 'import.mnemonic_phrase')}</div>
+            <p className="text-sm text-muted">{uiText(lang, 'import.mnemonic_desc')}</p>
           </button>
           <button
             onClick={() => setMode('json')}
             className="card card-hover text-left space-y-3"
           >
             <Upload className="w-8 h-8 text-primary" />
-            <div className="font-semibold">wallet.json File</div>
-            <p className="text-sm text-muted">Import an existing encrypted wallet file</p>
+            <div className="font-semibold">{uiText(lang, 'import.wallet_json_file')}</div>
+            <p className="text-sm text-muted">{uiText(lang, 'import.wallet_json_desc')}</p>
           </button>
         </div>
       )}
 
       {mode === 'mnemonic' && (
         <div className="card space-y-4">
-          <h2 className="text-lg font-semibold">Import from Mnemonic</h2>
+          <h2 className="text-lg font-semibold">{uiText(lang, 'import.import_from_mnemonic')}</h2>
 
           <div>
-            <label className="text-sm text-muted mb-1 block">Wallet Name</label>
+            <label className="text-sm text-muted mb-1 block">{uiText(lang, 'import.wallet_name')}</label>
             <input
               type="text"
               value={walletName}
               onChange={e => setWalletName(e.target.value)}
-              placeholder="e.g. Imported Wallet"
+              placeholder={uiText(lang, 'import.wallet_name_placeholder')}
               className="w-full"
             />
           </div>
 
           <div>
-            <label className="text-sm text-muted mb-1 block">Mnemonic Phrase</label>
+            <label className="text-sm text-muted mb-1 block">{uiText(lang, 'import.mnemonic_input')}</label>
             <textarea
               value={mnemonic}
               onChange={e => { setMnemonic(e.target.value); setAddress(''); setError(''); }}
-              placeholder="Enter your recovery words separated by spaces..."
+              placeholder={uiText(lang, 'import.mnemonic_placeholder')}
               className="w-full h-28 resize-none"
             />
           </div>
 
           {!address && mnemonic.trim().split(/\s+/).length >= 12 && (
             <button onClick={handleValidateMnemonic} className="btn-outline text-sm">
-              Validate & Show Address
+              {uiText(lang, 'import.validate_show_address')}
             </button>
           )}
 
           {address && (
             <div className="p-3 rounded-lg bg-accent/10 border border-accent/20 text-sm">
-              <span className="text-muted">Address: </span>
+              <span className="text-muted">{uiText(lang, 'import.address')} </span>
               <span className="font-mono">{address}</span>
             </div>
           )}
@@ -211,22 +212,22 @@ function ImportPage() {
           {address && (
             <>
               <div>
-                <label className="text-sm text-muted mb-1 block">Password</label>
+                <label className="text-sm text-muted mb-1 block">{uiText(lang, 'import.password')}</label>
                 <input
                   type="password"
                   value={password}
                   onChange={e => { setPassword(e.target.value); setError(''); }}
-                  placeholder="At least 8 characters"
+                  placeholder={uiText(lang, 'settings.at_least_8')}
                   className="w-full"
                 />
               </div>
               <div>
-                <label className="text-sm text-muted mb-1 block">Confirm Password</label>
+                <label className="text-sm text-muted mb-1 block">{uiText(lang, 'import.confirm_password')}</label>
                 <input
                   type="password"
                   value={confirmPw}
                   onChange={e => { setConfirmPw(e.target.value); setError(''); }}
-                  placeholder="Repeat password"
+                  placeholder={uiText(lang, 'settings.repeat_new_password')}
                   className="w-full"
                 />
               </div>
@@ -236,7 +237,7 @@ function ImportPage() {
           {error && <p className="text-danger text-sm">{error}</p>}
 
           <div className="flex gap-3">
-            <button onClick={() => setMode('select')} className="btn-outline">Back</button>
+            <button onClick={() => setMode('select')} className="btn-outline">{uiText(lang, 'common.back')}</button>
             {address && (
               <button
                 onClick={handleImportMnemonic}
@@ -244,7 +245,7 @@ function ImportPage() {
                 disabled={loading}
               >
                 {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-                Import Wallet
+                {uiText(lang, 'import.import_wallet')}
               </button>
             )}
           </div>
@@ -253,20 +254,20 @@ function ImportPage() {
 
       {mode === 'json' && (
         <div className="card space-y-4">
-          <h2 className="text-lg font-semibold">Import from wallet.json</h2>
+          <h2 className="text-lg font-semibold">{uiText(lang, 'import.import_from_wallet_json')}</h2>
 
           <div className="flex items-start gap-3 p-3 rounded-lg bg-primary/10 border border-primary/20 text-sm">
             <AlertTriangle className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-            <span className="text-muted">Only v2 wallet files are supported. Legacy wallets need migration via CLI first.</span>
+            <span className="text-muted">{uiText(lang, 'import.only_v2_supported')}</span>
           </div>
 
           <div>
-            <label className="text-sm text-muted mb-1 block">Wallet Name</label>
+            <label className="text-sm text-muted mb-1 block">{uiText(lang, 'import.wallet_name')}</label>
             <input
               type="text"
               value={walletName}
               onChange={e => setWalletName(e.target.value)}
-              placeholder="e.g. Mining Wallet"
+              placeholder={uiText(lang, 'import.wallet_name_placeholder')}
               className="w-full"
             />
           </div>
@@ -291,7 +292,7 @@ function ImportPage() {
               ) : (
                 <div className="text-muted">
                   <Upload className="w-8 h-8 mx-auto mb-2" />
-                  <p>Click to select wallet.json file</p>
+                  <p>{uiText(lang, 'import.click_select_wallet_json')}</p>
                 </div>
               )}
             </button>
@@ -299,13 +300,13 @@ function ImportPage() {
 
           {jsonPayload && !jsonVerified && (
             <div>
-              <label className="text-sm text-muted mb-1 block">Wallet Password</label>
+              <label className="text-sm text-muted mb-1 block">{uiText(lang, 'import.wallet_password')}</label>
               <div className="flex gap-2">
                 <input
                   type="password"
                   value={jsonPassword}
                   onChange={e => { setJsonPassword(e.target.value); setError(''); }}
-                  placeholder="Enter the wallet password"
+                  placeholder={uiText(lang, 'import.enter_wallet_password')}
                   className="flex-1"
                 />
                 <button
@@ -314,7 +315,7 @@ function ImportPage() {
                   disabled={loading || !jsonPassword}
                 >
                   {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-                  Verify
+                  {uiText(lang, 'import.verify')}
                 </button>
               </div>
             </div>
@@ -323,18 +324,16 @@ function ImportPage() {
           {jsonVerified && (
             <div className="p-3 rounded-lg bg-accent/10 border border-accent/20 text-sm flex items-center gap-2">
               <Check className="w-4 h-4 text-accent" />
-              <span>Password verified. Ready to import.</span>
+              <span>{uiText(lang, 'import.password_verified_ready')}</span>
             </div>
           )}
 
           {error && <p className="text-danger text-sm">{error}</p>}
 
           <div className="flex gap-3">
-            <button onClick={() => setMode('select')} className="btn-outline">Back</button>
+            <button onClick={() => setMode('select')} className="btn-outline">{uiText(lang, 'common.back')}</button>
             {jsonVerified && (
-              <button onClick={handleImportJson} className="btn-primary flex-1">
-                Import Wallet
-              </button>
+              <button onClick={handleImportJson} className="btn-primary flex-1">{uiText(lang, 'import.import_wallet')}</button>
             )}
           </div>
         </div>

@@ -7,8 +7,13 @@ import { shortAddress, formatAlice, formatTimestamp } from '@/lib/utils';
 import type { TransactionRecord } from '@/lib/types';
 import AppShell from '@/components/AppShell';
 import { ArrowUpRight, ArrowDownLeft, ExternalLink, Loader2, RefreshCw } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { getActiveLang } from '@/lib/i18n';
+import { uiText } from '@/lib/ui-text';
 
 function HistoryPage() {
+  const pathname = usePathname();
+  const lang = getActiveLang(pathname);
   const { wallets, activeWalletId } = useWalletStore();
   const wallet = wallets.find(w => w.id === activeWalletId);
 
@@ -32,13 +37,13 @@ function HistoryPage() {
   useEffect(() => { load(); }, [load]);
 
   if (!wallet) {
-    return <p className="text-muted">Select a wallet first.</p>;
+    return <p className="text-muted">{uiText(lang, 'settings.select_wallet_first')}</p>;
   }
 
   return (
     <div className="max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Transaction History</h1>
+        <h1 className="text-2xl font-bold">{uiText(lang, 'history.title')}</h1>
         <button onClick={load} className="text-muted hover:text-foreground" disabled={loading}>
           <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
         </button>
@@ -49,7 +54,7 @@ function HistoryPage() {
           <Loader2 className="w-8 h-8 animate-spin text-muted" />
         </div>
       ) : txns.length === 0 ? (
-        <div className="card text-center text-muted py-12">No transactions found</div>
+        <div className="card text-center text-muted py-12">{uiText(lang, 'history.no_transactions')}</div>
       ) : (
         <>
           <div className="card p-0 divide-y divide-border overflow-hidden">
@@ -67,19 +72,19 @@ function HistoryPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">{isSend ? 'Sent' : 'Received'}</span>
+                      <span className="text-sm font-medium">{isSend ? uiText(lang, 'history.sent') : uiText(lang, 'history.received')}</span>
                       <span className={`text-xs px-1.5 py-0.5 rounded ${tx.success ? 'bg-accent/15 text-accent' : 'bg-danger/15 text-danger'}`}>
-                        {tx.success ? 'Success' : 'Failed'}
+                        {tx.success ? uiText(lang, 'history.success') : uiText(lang, 'history.failed')}
                       </span>
                     </div>
                     <div className="text-xs text-muted truncate mt-0.5">
                       {isSend
-                        ? `To: ${shortAddress(tx.to_address || '', 8)}`
-                        : `From: ${shortAddress(tx.from_address || '', 8)}`
+                        ? `${uiText(lang, 'history.to')} ${shortAddress(tx.to_address || '', 8)}`
+                        : `${uiText(lang, 'history.from')} ${shortAddress(tx.from_address || '', 8)}`
                       }
                     </div>
                     <div className="text-xs text-muted mt-0.5">
-                      Block #{tx.block_number.toLocaleString()}
+                      {uiText(lang, 'history.block')}{tx.block_number.toLocaleString()}
                     </div>
                   </div>
                   <div className="text-right shrink-0">
@@ -108,7 +113,7 @@ function HistoryPage() {
               onClick={() => setLimit(l => l + 50)}
               className="btn-outline w-full mt-4"
             >
-              Load More
+              {uiText(lang, 'history.load_more')}
             </button>
           )}
         </>

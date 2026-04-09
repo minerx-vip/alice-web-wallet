@@ -7,6 +7,7 @@ import { useWalletStore } from '@/lib/store';
 import { generateMnemonic, createWalletPayload, addressFromMnemonic } from '@/lib/crypto';
 import { generateId } from '@/lib/utils';
 import { getLangFromPathname, withLang } from '@/lib/i18n';
+import { uiText } from '@/lib/ui-text';
 import AppShell from '@/components/AppShell';
 import { Loader2, Eye, EyeOff, Copy, Check, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
@@ -34,7 +35,7 @@ function CreatePage() {
 
   const handleGenerateMnemonic = async () => {
     if (!walletName.trim()) {
-      setError('Please enter a wallet name');
+      setError(uiText(lang, 'create.enter_wallet_name'));
       return;
     }
     setLoading(true);
@@ -52,7 +53,7 @@ function CreatePage() {
       setVerifyIndices(indices.sort((a, b) => a - b));
       setStep('mnemonic');
     } catch (err) {
-      toast.error('Failed to generate mnemonic');
+      toast.error(uiText(lang, 'create.failed_generate_mnemonic'));
       console.error(err);
     } finally {
       setLoading(false);
@@ -62,7 +63,7 @@ function CreatePage() {
   const handleConfirmMnemonic = () => {
     for (const idx of verifyIndices) {
       if (confirmWords[idx]?.trim().toLowerCase() !== words[idx].toLowerCase()) {
-        setError(`Word #${idx + 1} is incorrect`);
+        setError(uiText(lang, 'create.word_incorrect', { num: idx + 1 }));
         return;
       }
     }
@@ -72,11 +73,11 @@ function CreatePage() {
 
   const handleCreateWallet = async () => {
     if (password.length < 8) {
-      setError('Password must be at least 8 characters');
+      setError(uiText(lang, 'create.password_min_8'));
       return;
     }
     if (password !== confirmPw) {
-      setError('Passwords do not match');
+      setError(uiText(lang, 'create.passwords_no_match'));
       return;
     }
     setLoading(true);
@@ -95,7 +96,7 @@ function CreatePage() {
       });
       unlock(seed, mnemonic);
       setStep('done');
-      toast.success('Wallet created successfully!');
+      toast.success(uiText(lang, 'toast.wallet_created'));
       setTimeout(() => router.push(withLang('/', lang)), 1500);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create wallet');
@@ -112,11 +113,16 @@ function CreatePage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Create New Wallet</h1>
+      <h1 className="text-2xl font-bold mb-6">{uiText(lang, 'create.title')}</h1>
 
       {/* Step indicator */}
       <div className="flex items-center gap-2 mb-8">
-        {['Name', 'Backup', 'Verify', 'Password'].map((label, i) => {
+        {[
+          uiText(lang, 'create.step.name'),
+          uiText(lang, 'create.step.backup'),
+          uiText(lang, 'create.step.verify'),
+          uiText(lang, 'create.step.password'),
+        ].map((label, i) => {
           const steps = ['name', 'mnemonic', 'confirm', 'password'];
           const stepIdx = steps.indexOf(step);
           const isActive = i === stepIdx;
@@ -140,11 +146,11 @@ function CreatePage() {
       {/* Step: Name */}
       {step === 'name' && (
         <div className="card space-y-4">
-          <h2 className="text-lg font-semibold">Wallet Name</h2>
-          <p className="text-sm text-muted">Give your wallet a name to identify it easily.</p>
+          <h2 className="text-lg font-semibold">{uiText(lang, 'create.wallet_name')}</h2>
+          <p className="text-sm text-muted">{uiText(lang, 'create.wallet_name_desc')}</p>
           <input
             type="text"
-            placeholder="e.g. My Wallet, Mining Wallet..."
+            placeholder={uiText(lang, 'create.wallet_name_placeholder')}
             value={walletName}
             onChange={e => { setWalletName(e.target.value); setError(''); }}
             className="w-full"
@@ -153,7 +159,7 @@ function CreatePage() {
           {error && <p className="text-danger text-sm">{error}</p>}
           <button onClick={handleGenerateMnemonic} className="btn-primary flex items-center gap-2" disabled={loading}>
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-            Generate Mnemonic
+            {uiText(lang, 'create.generate_mnemonic')}
           </button>
         </div>
       )}
@@ -164,13 +170,13 @@ function CreatePage() {
           <div className="flex items-start gap-3 p-3 rounded-lg bg-danger/10 border border-danger/20">
             <AlertTriangle className="w-5 h-5 text-danger shrink-0 mt-0.5" />
             <div className="text-sm">
-              <p className="font-semibold text-danger">Write down these 24 words IN ORDER</p>
-              <p className="text-muted mt-1">This is the ONLY way to recover your wallet. Never save digitally. Never share.</p>
+              <p className="font-semibold text-danger">{uiText(lang, 'create.write_down_title')}</p>
+              <p className="text-muted mt-1">{uiText(lang, 'create.write_down_desc')}</p>
             </div>
           </div>
 
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Your Mnemonic</h2>
+            <h2 className="text-lg font-semibold">{uiText(lang, 'create.your_mnemonic')}</h2>
             <div className="flex items-center gap-2">
               <button onClick={() => setShowMnemonic(!showMnemonic)} className="text-muted hover:text-foreground">
                 {showMnemonic ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -190,10 +196,10 @@ function CreatePage() {
             ))}
           </div>
 
-          <p className="text-xs text-muted">Address: {address}</p>
+          <p className="text-xs text-muted">{uiText(lang, 'create.address')} {address}</p>
 
           <button onClick={() => setStep('confirm')} className="btn-primary w-full">
-            I have saved my mnemonic
+            {uiText(lang, 'create.saved_mnemonic')}
           </button>
         </div>
       )}
@@ -201,13 +207,13 @@ function CreatePage() {
       {/* Step: Confirm */}
       {step === 'confirm' && (
         <div className="card space-y-4">
-          <h2 className="text-lg font-semibold">Verify Your Backup</h2>
-          <p className="text-sm text-muted">Enter the following words from your mnemonic to confirm you saved them.</p>
+          <h2 className="text-lg font-semibold">{uiText(lang, 'create.verify_backup')}</h2>
+          <p className="text-sm text-muted">{uiText(lang, 'create.verify_backup_desc')}</p>
 
           <div className="space-y-3">
             {verifyIndices.map(idx => (
               <div key={idx}>
-                <label className="text-sm text-muted mb-1 block">Word #{idx + 1}</label>
+                <label className="text-sm text-muted mb-1 block">{uiText(lang, 'create.word_number', { num: idx + 1 })}</label>
                 <input
                   type="text"
                   value={confirmWords[idx] || ''}
@@ -216,7 +222,7 @@ function CreatePage() {
                     setError('');
                   }}
                   className="w-full"
-                  placeholder={`Enter word #${idx + 1}`}
+                  placeholder={uiText(lang, 'create.enter_word_number', { num: idx + 1 })}
                 />
               </div>
             ))}
@@ -225,8 +231,8 @@ function CreatePage() {
           {error && <p className="text-danger text-sm">{error}</p>}
 
           <div className="flex gap-3">
-            <button onClick={() => setStep('mnemonic')} className="btn-outline flex-1">Back</button>
-            <button onClick={handleConfirmMnemonic} className="btn-primary flex-1">Verify</button>
+            <button onClick={() => setStep('mnemonic')} className="btn-outline flex-1">{uiText(lang, 'common.back')}</button>
+            <button onClick={handleConfirmMnemonic} className="btn-primary flex-1">{uiText(lang, 'create.verify')}</button>
           </div>
         </div>
       )}
@@ -234,27 +240,27 @@ function CreatePage() {
       {/* Step: Password */}
       {step === 'password' && (
         <div className="card space-y-4">
-          <h2 className="text-lg font-semibold">Set Password</h2>
-          <p className="text-sm text-muted">This password encrypts your wallet locally. Min 8 characters.</p>
+          <h2 className="text-lg font-semibold">{uiText(lang, 'create.set_password')}</h2>
+          <p className="text-sm text-muted">{uiText(lang, 'create.password_encrypt_desc')}</p>
 
           <div>
-            <label className="text-sm text-muted mb-1 block">Password</label>
+            <label className="text-sm text-muted mb-1 block">{uiText(lang, 'create.password')}</label>
             <input
               type="password"
               value={password}
               onChange={e => { setPassword(e.target.value); setError(''); }}
               className="w-full"
-              placeholder="At least 8 characters"
+              placeholder={uiText(lang, 'settings.at_least_8')}
             />
           </div>
           <div>
-            <label className="text-sm text-muted mb-1 block">Confirm Password</label>
+            <label className="text-sm text-muted mb-1 block">{uiText(lang, 'create.confirm_password')}</label>
             <input
               type="password"
               value={confirmPw}
               onChange={e => { setConfirmPw(e.target.value); setError(''); }}
               className="w-full"
-              placeholder="Repeat password"
+              placeholder={uiText(lang, 'settings.repeat_new_password')}
             />
           </div>
 
@@ -262,7 +268,7 @@ function CreatePage() {
 
           <button onClick={handleCreateWallet} className="btn-primary w-full flex items-center justify-center gap-2" disabled={loading}>
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-            Create Wallet
+            {uiText(lang, 'create.create_wallet')}
           </button>
         </div>
       )}
@@ -273,8 +279,8 @@ function CreatePage() {
           <div className="w-16 h-16 rounded-full bg-accent/15 flex items-center justify-center mx-auto">
             <Check className="w-8 h-8 text-accent" />
           </div>
-          <h2 className="text-xl font-bold">Wallet Created!</h2>
-          <p className="text-muted text-sm">Redirecting to dashboard...</p>
+          <h2 className="text-xl font-bold">{uiText(lang, 'create.wallet_created')}</h2>
+          <p className="text-muted text-sm">{uiText(lang, 'create.redirecting')}</p>
         </div>
       )}
     </div>

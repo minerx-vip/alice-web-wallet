@@ -38,15 +38,27 @@ export function setStoredLang(lang: AppLang): void {
 }
 
 export function getLangFromPathname(pathname: string): AppLang {
-  const seg = pathname.split('/').filter(Boolean)[0];
-  if (seg === 'en' || seg === 'zh-CN') return seg;
+  const parts = pathname.split('/').filter(Boolean);
+  const seg1 = parts[0];
+  const seg2 = parts[1];
+  if (seg1 === 'en' || seg1 === 'zh-CN') return seg1;
+  if (seg1 === 'alice-web-wallet' && (seg2 === 'en' || seg2 === 'zh-CN')) return seg2;
   return DEFAULT_LANG;
+}
+
+export function getActiveLang(pathname: string): AppLang {
+  const fromPath = getLangFromPathname(pathname);
+  if (fromPath !== DEFAULT_LANG) return fromPath;
+  return getStoredLang() ?? detectBrowserLang();
 }
 
 export function stripLangPrefix(pathname: string): string {
   const parts = pathname.split('/').filter(Boolean);
   if (parts[0] === 'en' || parts[0] === 'zh-CN') {
     return '/' + parts.slice(1).join('/');
+  }
+  if (parts[0] === 'alice-web-wallet' && (parts[1] === 'en' || parts[1] === 'zh-CN')) {
+    return '/' + parts.slice(2).join('/');
   }
   return pathname || '/';
 }

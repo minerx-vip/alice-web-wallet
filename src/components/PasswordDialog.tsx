@@ -2,6 +2,9 @@
 
 import { useState } from 'react';
 import { Lock, X, Loader2 } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { getActiveLang } from '@/lib/i18n';
+import { uiText } from '@/lib/ui-text';
 
 interface PasswordDialogProps {
   open: boolean;
@@ -11,6 +14,8 @@ interface PasswordDialogProps {
 }
 
 export default function PasswordDialog({ open, title = 'Unlock Wallet', onSubmit, onCancel }: PasswordDialogProps) {
+  const pathname = usePathname();
+  const lang = getActiveLang(pathname);
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -26,7 +31,7 @@ export default function PasswordDialog({ open, title = 'Unlock Wallet', onSubmit
       await onSubmit(password);
       setPassword('');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Invalid password');
+      setError(err instanceof Error ? err.message : uiText(lang, 'pw.invalid_password'));
     } finally {
       setLoading(false);
     }
@@ -48,7 +53,7 @@ export default function PasswordDialog({ open, title = 'Unlock Wallet', onSubmit
         <form onSubmit={handleSubmit}>
           <input
             type="password"
-            placeholder="Enter wallet password"
+            placeholder={uiText(lang, 'pw.enter_wallet_password')}
             value={password}
             onChange={e => setPassword(e.target.value)}
             className="w-full mb-3"
@@ -62,11 +67,11 @@ export default function PasswordDialog({ open, title = 'Unlock Wallet', onSubmit
 
           <div className="flex gap-3 justify-end">
             <button type="button" onClick={onCancel} className="btn-outline" disabled={loading}>
-              Cancel
+              {uiText(lang, 'common.cancel')}
             </button>
             <button type="submit" className="btn-primary flex items-center gap-2" disabled={loading || !password}>
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-              Unlock
+              {uiText(lang, 'pw.unlock')}
             </button>
           </div>
         </form>
