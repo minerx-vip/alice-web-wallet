@@ -197,7 +197,7 @@ const DICT: Dict = {
 
     // Sidebar
     'nav.dashboard': '首页',
-    'nav.transfer': '转账',
+    'nav.transfer': '发送',
     'nav.settings': '设置',
     'nav.create': '新建',
     'nav.import': '导入',
@@ -293,8 +293,8 @@ const DICT: Dict = {
     'dashboard.select_wallet': '请在左侧选择一个钱包。',
     'dashboard.balance': '余额',
     'dashboard.failed_load_balance': '余额加载失败',
-    'dashboard.send': '转账',
-    'dashboard.transfer_alice': '转账 ALICE',
+    'dashboard.send': '发送',
+    'dashboard.transfer_alice': '发送 ALICE',
     'dashboard.transactions': '交易记录',
     'dashboard.loading_transactions': '正在加载交易记录…',
     'dashboard.failed_load_transactions': '交易记录加载失败',
