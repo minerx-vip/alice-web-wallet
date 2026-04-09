@@ -1,4 +1,4 @@
-# Alice Web Wallet（爱丽丝网页钱包）
+# Alice网页钱包
 
 这是 Alice Protocol 的网页钱包。
 
